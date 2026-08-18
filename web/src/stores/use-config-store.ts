@@ -20,6 +20,7 @@ export type ModelChannel = {
     name: string;
     baseUrl: string;
     apiKey: string;
+    proxyUrl: string;
     apiFormat: ApiCallFormat;
     models: ChannelModel[];
 };
@@ -28,6 +29,7 @@ export type AiConfig = {
     channelMode: "remote" | "local";
     baseUrl: string;
     apiKey: string;
+    proxyUrl: string;
     apiFormat: ApiCallFormat;
     channels: ModelChannel[];
     model: string;
@@ -72,6 +74,7 @@ export const defaultConfig: AiConfig = {
     channelMode: "local",
     baseUrl: OPENAI_BASE_URL,
     apiKey: "",
+    proxyUrl: "",
     apiFormat: "openai",
     channels: [
         {
@@ -79,6 +82,7 @@ export const defaultConfig: AiConfig = {
             name: i18n.t("config.channels.defaultName"),
             baseUrl: OPENAI_BASE_URL,
             apiKey: "",
+            proxyUrl: "",
             apiFormat: "openai",
             models: [
                 { name: "gpt-image-2", capability: "image" },
@@ -281,6 +285,7 @@ export function createModelChannel(channel?: Partial<ModelChannel>): ModelChanne
         name: channel?.name?.trim() || i18n.t("config.channels.newName"),
         baseUrl: channel?.baseUrl?.trim() || defaultBaseUrlForApiFormat(apiFormat),
         apiKey: channel?.apiKey || "",
+        proxyUrl: channel?.proxyUrl?.trim() || "",
         apiFormat,
         models: normalizeChannelModels(channel?.models),
     };
@@ -341,6 +346,7 @@ export function resolveModelRequestConfig(config: AiConfig, value: string) {
         model: modelOptionName(value || config.model),
         baseUrl: channel.baseUrl,
         apiKey: channel.apiKey,
+        proxyUrl: channel.proxyUrl || config.proxyUrl || "",
         apiFormat: channel.apiFormat,
     };
 }
@@ -384,12 +390,17 @@ function uniqueModelOptions(models: string[]) {
     return Array.from(new Set((models || []).map((model) => model.trim()).filter(Boolean)));
 }
 
-export function buildApiUrl(baseUrl: string, path: string) {
+export function buildApiUrl(baseUrl: string, path: string, proxyUrl?: string) {
     let normalizedBaseUrl = baseUrl.trim().replace(/\/+$/, "");
     normalizedBaseUrl = normalizeArkPlanBaseUrl(normalizedBaseUrl);
     const lowerBaseUrl = normalizedBaseUrl.toLowerCase();
     const apiBaseUrl = lowerBaseUrl.endsWith("/v1") || lowerBaseUrl.endsWith("/api/v3") || lowerBaseUrl.endsWith("/api/plan/v3") ? normalizedBaseUrl : `${normalizedBaseUrl}/v1`;
-    return `${apiBaseUrl}${path}`;
+    const finalUrl = `${apiBaseUrl}${path}`;
+    if (proxyUrl && proxyUrl.trim()) {
+        const proxy = proxyUrl.trim().replace(/\/+$/, "");
+        return `${proxy}/relay/${encodeURIComponent(finalUrl)}`;
+    }
+    return finalUrl;
 }
 
 function normalizeArkPlanBaseUrl(baseUrl: string) {

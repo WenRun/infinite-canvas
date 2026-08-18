@@ -79,6 +79,10 @@ export function ChannelEditorDrawer({ open, channel, onSave, onClose }: { open: 
                     <Input value={draft.baseUrl} onChange={(event) => patch({ baseUrl: event.target.value })} placeholder="https://api.example.com" />
                 </label>
                 <label className="block md:col-span-2">
+                    <span className="mb-1 block text-sm font-medium">{t("config.channelEditor.proxyUrl")}</span>
+                    <Input value={draft.proxyUrl} onChange={(event) => patch({ proxyUrl: event.target.value })} placeholder="http://192.168.31.31:8399" />
+                </label>
+                <label className="block md:col-span-2">
                     <span className="mb-1 block text-sm font-medium">API Key</span>
                     <Input.Password value={draft.apiKey} onChange={(event) => patch({ apiKey: event.target.value })} placeholder="sk-..." />
                 </label>

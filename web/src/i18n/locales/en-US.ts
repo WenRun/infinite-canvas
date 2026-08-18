@@ -483,6 +483,7 @@ export default {
             name: "Provider name",
             protocol: "Protocol",
             baseUrl: "API endpoint",
+            proxyUrl: "Proxy URL (optional, CORS relay)",
             models: "Provider models",
             modelDescription: "{{count}} selected; assign a capability to each model and optionally customize its request script.",
             selectModels: "Select models",
